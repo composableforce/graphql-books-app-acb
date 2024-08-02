@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/graphql-router http://www.mulesoft.org/schema/mule/graphql-router/current/mule-graphql-router.xsd http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+  <munit:config name="graphql-test-suite.xml" />
+  <http:request-config name="HTTP_Request_configuration">
+    <http:request-connection host="localhost" port="8081" />
+  </http:request-config>
+  <munit:test name="Query.bookByIdTest">
+    <munit:enable-flow-sources>
+      <munit:enable-flow-source value="api-main-flow" />
+      <munit:enable-flow-source value="Query.bookById" />
+      <munit:enable-flow-source value="Query.books" />
+      <munit:enable-flow-source value="Query.bestsellers" />
+      <munit:enable-flow-source value="Book.author" />
+      <munit:enable-flow-source value="Bestsellers.books" />
+      <munit:enable-flow-source value="Bestsellers.authors" />
+    </munit:enable-flow-sources>
+    <munit:execution>
+      <http:request method="POST" config-ref="HTTP_Request_configuration" path="/graphql">
+        <http:body>{
+bookById(id: "some-id") {
+  pageCount
+  name
+  id
+  author {
+    lastName
+    firstName
+    id
+  }
+}
+}</http:body>
+        <http:headers>#[{ 'Content-Type': 'application/json' }]</http:headers>
+      </http:request>
+    </munit:execution>
+    <munit:validation>
+      <munit-tools:assert-that message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+      <munit-tools:assert-that message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+    </munit:validation>
+  </munit:test>
+  <munit:test name="Query.booksTest">
+    <munit:enable-flow-sources>
+      <munit:enable-flow-source value="api-main-flow" />
+      <munit:enable-flow-source value="Query.bookById" />
+      <munit:enable-flow-source value="Query.books" />
+      <munit:enable-flow-source value="Query.bestsellers" />
+      <munit:enable-flow-source value="Book.author" />
+      <munit:enable-flow-source value="Bestsellers.books" />
+      <munit:enable-flow-source value="Bestsellers.authors" />
+    </munit:enable-flow-sources>
+    <munit:execution>
+      <http:request method="POST" config-ref="HTTP_Request_configuration" path="/graphql">
+        <http:body>{
+books {
+  pageCount
+  name
+  id
+  author {
+    lastName
+    firstName
+    id
+  }
+}
+}</http:body>
+        <http:headers>#[{ 'Content-Type': 'application/json' }]</http:headers>
+      </http:request>
+    </munit:execution>
+    <munit:validation>
+      <munit-tools:assert-that message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+      <munit-tools:assert-that message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+    </munit:validation>
+  </munit:test>
+  <munit:test name="Query.bestsellersTest">
+    <munit:enable-flow-sources>
+      <munit:enable-flow-source value="api-main-flow" />
+      <munit:enable-flow-source value="Query.bookById" />
+      <munit:enable-flow-source value="Query.books" />
+      <munit:enable-flow-source value="Query.bestsellers" />
+      <munit:enable-flow-source value="Book.author" />
+      <munit:enable-flow-source value="Bestsellers.books" />
+      <munit:enable-flow-source value="Bestsellers.authors" />
+    </munit:enable-flow-sources>
+    <munit:execution>
+      <http:request method="POST" config-ref="HTTP_Request_configuration" path="/graphql">
+        <http:body>{
+bestsellers {
+  authors {
+    lastName
+    firstName
+    id
+  }
+  books {
+    pageCount
+    name
+    id
+    author {
+      lastName
+      firstName
+      id
+    }
+  }
+}
+}</http:body>
+        <http:headers>#[{ 'Content-Type': 'application/json' }]</http:headers>
+      </http:request>
+    </munit:execution>
+    <munit:validation>
+      <munit-tools:assert-that message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" />
+      <munit-tools:assert-that message="The response payload is not correct!" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+    </munit:validation>
+  </munit:test>
+</mule>
